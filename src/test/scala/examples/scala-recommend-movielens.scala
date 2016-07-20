@@ -2,18 +2,17 @@
     on MLib
 */
 
-// define file location (either one)
-
 // this is used to implicitly convert an RDD to a DataFrame
-//import sqlContext.implicits._
+import sqlContext.implicits._
 
 // import Spark SQL types
-//import org.apache.spark.sql._
+import org.apache.spark.sql._
 
 // import mllib recommendation data types
 import org.apache.spark.mllib.recommendation.{ALS,
   MatrixFactorizationModel, Rating}
 
+// define file location (either one)
 //val folderLocation = "~/Envs/sparkdatafromexample/data/movielensmedium/"
 val folderLocation = "hdfs://192.168.0.94:8020/user/jchong1/movielens"
 
@@ -92,7 +91,7 @@ val results = sqlContext.sql(
   min(ratings.rating) as minr, count(distinct user) as cntu
   FROM ratings GROUP BY ratings.product) movierates
   JOIN movies on movierates.product = movies.MovieId
-  ORDER BY moviesrates.cntu DESC")
+  ORDER BY movierates.cntu DESC")
 
 // display top 20 results
 results.show()
