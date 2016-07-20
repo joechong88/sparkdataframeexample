@@ -2,6 +2,11 @@
     on MLib
 */
 
+// SQLContext entry point for working with structured data
+// ** this is important to define first before the import statements below
+// else the import statements would fail **
+val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+
 // this is used to implicitly convert an RDD to a DataFrame
 import sqlContext.implicits._
 
@@ -13,11 +18,8 @@ import org.apache.spark.mllib.recommendation.{ALS,
   MatrixFactorizationModel, Rating}
 
 // define file location (either one)
-//val folderLocation = "~/Envs/sparkdatafromexample/data/movielensmedium/"
-val folderLocation = "hdfs://192.168.0.94:8020/user/jchong1/movielens"
-
-// SQLContext entry point for working with structured data
-val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+val folderLocation = "movielens"
+//val folderLocation = "hdfs://192.168.0.94:8020/user/jchong1/movielens"
 
 // use the scala classes to define the Movie and User schemas
 // input format MovieID::Title::Genre (in this case ignore Genre)
@@ -85,13 +87,14 @@ moviesDF.printSchema()
 ratingsDF.printSchema()
 
 // get the min, max ratings along with the count of users who have rated a movie
+// ** multi-line SQL statements in Scala code need to have triple double-quotes **
 val results = sqlContext.sql(
-  "SELECT movies.title, movierates.maxr, movierates.minr, movierates.cntu
+  """SELECT movies.title, movierates.maxr, movierates.minr, movierates.cntu
   FROM (SELECT ratings.product, max(ratings.rating) as maxr,
   min(ratings.rating) as minr, count(distinct user) as cntu
   FROM ratings GROUP BY ratings.product) movierates
-  JOIN movies on movierates.product = movies.MovieId
-  ORDER BY movierates.cntu DESC")
+  JOIN movies on movierates.product = movies.movieId
+  ORDER BY movierates.cntu DESC""")
 
 // display top 20 results
 results.show()
